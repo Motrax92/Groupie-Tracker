@@ -50,9 +50,11 @@ func (s *AppState) buildUI() {
 	s.StatusLabel = widget.NewLabel("Ready")
 
 	s.ArtistList = widget.NewList(
-		func() int { return len(s.Filtered) },
+		func() int {
+			return len(s.Filtered)
+		},
 		func() fyne.CanvasObject {
-			return widget.NewLabel("Artist")
+			return widget.NewLabel("")
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
 			o.(*widget.Label).SetText(s.Filtered[i].Artist.Name)
@@ -96,26 +98,26 @@ func (s *AppState) buildUI() {
 
 func (s *AppState) showArtistDetail(a api.ArtistFull) {
 	text := fmt.Sprintf(
-		"Name: %s\nCreation: %d\nFirst album: %s\nMembers:\n",
+		"Name: %s\nCreation date: %d\nFirst album: %s\n\nMembers:\n",
 		a.Artist.Name,
 		a.Artist.CreationDate,
 		a.Artist.FirstAlbum,
 	)
 
 	for _, m := range a.Artist.Members {
-		text += "  - " + m + "\n"
+		text += " - " + m + "\n"
 	}
 
 	text += "\nLocations:\n"
 	for _, loc := range a.Locations.Locations {
-		text += "  - " + loc + "\n"
+		text += " - " + loc + "\n"
 	}
 
 	text += "\nConcerts:\n"
 	for loc, dates := range a.Relation.DatesLocations {
-		text += "  " + loc + ":\n"
+		text += " " + loc + ":\n"
 		for _, d := range dates {
-			text += "    * " + d + "\n"
+			text += "   * " + d + "\n"
 		}
 	}
 

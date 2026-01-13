@@ -21,7 +21,7 @@ func (s *AppState) buildSearchBar() (*widget.Entry, *widget.List) {
 	list := widget.NewList(
 		func() int { return len(results) },
 		func() fyne.CanvasObject {
-			return widget.NewLabel("result")
+			return widget.NewLabel("")
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
 			o.(*widget.Label).SetText(results[i].Label)
@@ -113,7 +113,7 @@ func (s *AppState) buildFilterControls() fyne.CanvasObject {
 
 	for i, loc := range locations {
 		l := loc
-		locationChecks[i] = widget.NewCheck(l, func(b bool) {
+		locationChecks[i] = widget.NewCheck(l, func(bool) {
 			s.updateSelectedLocations(locationChecks)
 		})
 	}
@@ -121,12 +121,9 @@ func (s *AppState) buildFilterControls() fyne.CanvasObject {
 	applyBtn := widget.NewButton("Apply filters", func() {
 		s.Filters.CreationMin = parseInt(creationMinEntry.Text)
 		s.Filters.CreationMax = parseInt(creationMaxEntry.Text)
-
 		s.Filters.AlbumMinYear = parseInt(albumMinEntry.Text)
 		s.Filters.AlbumMaxYear = parseInt(albumMaxEntry.Text)
-
 		s.Filters.MembersCounts = parseMembers(membersEntry.Text)
-
 		s.applyFilters()
 	})
 
