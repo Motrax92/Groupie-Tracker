@@ -6,50 +6,51 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/theme"
 
 	"groupie-tracker/services"
 	"groupie-tracker/ui"
 )
 
 func main() {
-
 	// --- Création de l'application Fyne ---
 	myApp := app.New()
-	myWindow := myApp.NewWindow("Groupie Trackers")
+	myApp.Settings().SetTheme(theme.DarkTheme()) // Bonus : Mode sombre par défaut
+	
+	myWindow := myApp.NewWindow("Groupie Trackers Pro")
 	myWindow.Resize(fyne.NewSize(1200, 800))
 
-	// --- Services ---
-	apiService := services.NewAPIService()
-	searchService := services.NewSearchService()
-	filterService := services.NewFilterService()
-	geoService := services.NewGeoService()
-
-	// --- Récupération des artistes depuis l'API ---
-	artists, err := apiService.GetArtists()
+	// --- Récupération des données ---
+	// On appelle directement la fonction GetArtists du package services
+	artists, err := services.GetArtists()
 	if err != nil {
 		log.Fatal("Erreur lors de la récupération des artistes :", err)
 	}
 
 	// --- UI Components ---
-	searchBar := ui.NewSearchBar(searchService, artists)
-	filterPanel := ui.NewFilterPanel(filterService, artists)
-
-	artistList := ui.NewArtistList(artists, geoService)
+	// Note : Assurez-vous que vos fichiers dans le dossier ui/ 
+	// acceptent bien ces arguments dans leurs constructeurs.
+	searchBar := ui.NewSearchBar(artists)
+	filterPanel := ui.NewFilterPanel(artists)
+	artistList := ui.NewArtistList(artists)
 
 	// --- Layout principal ---
+	// On empile la barre de recherche et les filtres en haut
 	topBar := container.NewVBox(
 		searchBar.Render(),
 		filterPanel.Render(),
 	)
 
+	// Border layout : le topBar en haut, la liste au centre
 	content := container.NewBorder(
-		topBar,              // top
-		nil,                 // bottom
-		nil,                 // left
-		nil,                 // right
-		artistList.Render(), // center
+		topBar,              // Top
+		nil,                 // Bottom
+		nil,                 // Left
+		nil,                 // Right
+		artistList.Render(), // Center (Scrollable)
 	)
 
 	myWindow.SetContent(content)
+	myWindow.CenterOnScreen()
 	myWindow.ShowAndRun()
 }
