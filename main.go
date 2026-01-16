@@ -6,9 +6,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/widget"
 
-	"groupie-tracker/models"
 	"groupie-tracker/services"
 	"groupie-tracker/ui"
 )
@@ -45,10 +43,10 @@ func main() {
 	)
 
 	content := container.NewBorder(
-		topBar,  // top
-		nil,     // bottom
-		nil,     // left
-		nil,     // right
+		topBar,              // top
+		nil,                 // bottom
+		nil,                 // left
+		nil,                 // right
 		artistList.Render(), // center
 	)
 
