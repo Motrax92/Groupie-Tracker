@@ -1,20 +1,20 @@
 package ui
 
 import (
-	"groupie-tracker/api"
-	"groupie-tracker/core"
+	"groupie-tracker/models"
+	"groupie-tracker/services"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 )
 
-func NewAppWindow(app fyne.App, artists []api.Artist) fyne.Window {
+func NewAppWindow(app fyne.App, artists []models.Artist) fyne.Window {
 	window := app.NewWindow("Groupie Tracker")
 	window.Resize(fyne.NewSize(1000, 700))
 
 	artistList := container.NewVBox()
 
-	updateArtists := func(list []api.Artist) {
+	updateArtists := func(list []models.Artist) {
 		artistList.Objects = nil
 		for _, a := range list {
 			artistList.Add(NewArtistCard(a))
@@ -22,19 +22,25 @@ func NewAppWindow(app fyne.App, artists []api.Artist) fyne.Window {
 		artistList.Refresh()
 	}
 
+
 	updateArtists(artists)
 
+	
 	searchBar := NewSearchBar(func(query string) {
-		filtered := core.SearchArtists(artists, query)
-		updateArtists(filtered)
+		_ = services.SearchEngine(artists, query)
+		
 	})
+
 
 	filterPanel := NewFilterPanel(func() {
-		filtered := core.FilterByCreationDate(artists, 1950, 2025)
+		filtered := services.ApplyFilters(
+			artists,
+			1980, 
+			2025, 
+			0,    
+		)
 		updateArtists(filtered)
 	})
-
-	mapView := NewMapView()
 
 	left := container.NewVBox(
 		searchBar,
@@ -42,7 +48,7 @@ func NewAppWindow(app fyne.App, artists []api.Artist) fyne.Window {
 		container.NewVScroll(artistList),
 	)
 
-	content := container.NewHSplit(left, mapView)
+	content := container.NewHSplit(left, NewMapView())
 	content.SetOffset(0.4)
 
 	window.SetContent(content)
