@@ -1,27 +1,74 @@
 package services
 
-import "strings"
+import (
+	"fmt"
+	"strings"
 
-// SearchEngine identifie et affiche les suggestions par type (membre, artiste, etc.)
-func SearchEngine(artists []Artist, query string) []string {
-	var suggestions []string
-	query = strings.ToLower(query)
+	"groupie-tracker/models"
+)
+
+func FilterArtistsByQuery(artists []models.Artist, query string) []models.Artist {
+	query = strings.ToLower(strings.TrimSpace(query))
+	if query == "" {
+		return artists
+	}
+
+	var result []models.Artist
 
 	for _, a := range artists {
-		// Recherche par Nom d'artiste
+		match := false
+
 		if strings.Contains(strings.ToLower(a.Name), query) {
-			suggestions = append(suggestions, a.Name + " - artist/band")
+			match = true
 		}
-		// Recherche par Membres
+
 		for _, m := range a.Members {
 			if strings.Contains(strings.ToLower(m), query) {
-				suggestions = append(suggestions, m + " - member")
+				match = true
+				break
 			}
 		}
-		// Recherche par Lieu ou Date d'album
+
 		if strings.Contains(strings.ToLower(a.FirstAlbum), query) {
-			suggestions = append(suggestions, a.FirstAlbum + " - first album date")
+			match = true
+		}
+
+		if match {
+			result = append(result, a)
 		}
 	}
-	return suggestions
+
+	return result
+}
+
+func SearchSuggestions(artists []models.Artist, query string) []string {
+	query = strings.ToLower(strings.TrimSpace(query))
+	if query == "" {
+		return []string{}
+	}
+
+	var out []string
+
+	for _, a := range artists {
+		if strings.Contains(strings.ToLower(a.Name), query) {
+			out = append(out, a.Name+" — artiste")
+		}
+
+		for _, m := range a.Members {
+			if strings.Contains(strings.ToLower(m), query) {
+				out = append(out, m+" — membre")
+			}
+		}
+
+		if strings.Contains(strings.ToLower(a.FirstAlbum), query) {
+			out = append(out, a.FirstAlbum+" — premier album")
+		}
+
+		year := fmt.Sprint(a.CreationDate)
+		if strings.Contains(year, query) {
+			out = append(out, year+" — année de création")
+		}
+	}
+
+	return out
 }

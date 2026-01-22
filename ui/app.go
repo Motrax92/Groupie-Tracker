@@ -10,46 +10,57 @@ import (
 
 func NewAppWindow(app fyne.App, artists []models.Artist) fyne.Window {
 	window := app.NewWindow("Groupie Tracker")
-	window.Resize(fyne.NewSize(1000, 700))
+	window.Resize(fyne.NewSize(1100, 700))
 
 	artistList := container.NewVBox()
 
 	updateArtists := func(list []models.Artist) {
 		artistList.Objects = nil
 		for _, a := range list {
-			artistList.Add(NewArtistCard(a))
+			aa := a
+			artistList.Add(NewArtistCard(aa, func() {
+				ShowArtistDetails(app, aa)
+			}))
 		}
 		artistList.Refresh()
 	}
 
+	currentQuery := ""
+	currentMin := 0
+	currentMax := 0
+	currentMembers := 0
+
+	applyAll := func() {
+		list := services.FilterArtistsByQuery(artists, currentQuery)
+		list = services.ApplyFilters(list, currentMin, currentMax, currentMembers)
+		updateArtists(list)
+	}
 
 	updateArtists(artists)
 
-	
-	searchBar := NewSearchBar(func(query string) {
-		_ = services.SearchEngine(artists, query)
-		
+	search := NewSearchBar(func(q string) {
+		currentQuery = q
+		applyAll()
 	})
 
-
-	filterPanel := NewFilterPanel(func() {
-		filtered := services.ApplyFilters(
-			artists,
-			1980, 
-			2025, 
-			0,    
-		)
-		updateArtists(filtered)
+	filters := NewFilterPanel(func(min, max, mem int) {
+		currentMin = min
+		currentMax = max
+		currentMembers = mem
+		applyAll()
 	})
+
+	scroll := container.NewVScroll(artistList)
+	scroll.SetMinSize(fyne.NewSize(0, 500))
 
 	left := container.NewVBox(
-		searchBar,
-		filterPanel,
-		container.NewVScroll(artistList),
+		search,
+		filters,
+		scroll,
 	)
 
 	content := container.NewHSplit(left, NewMapView())
-	content.SetOffset(0.4)
+	content.SetOffset(0.6)
 
 	window.SetContent(content)
 	return window
